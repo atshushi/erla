@@ -9,7 +9,7 @@ import Message from './entities/message/Message.js'
 
 import Collection from './util/Collection.js'
 
-export class Client extends EventEmitter {
+export default class Client extends EventEmitter {
   user
 
   unavailableGuilds = new Collection()
@@ -19,7 +19,8 @@ export class Client extends EventEmitter {
     super()
 
     this.token = token
-    this.intents = options.intents || 0
+    this.intents = options.intents ?? 0
+    this.reconnect = options.reconnect ?? true
 
     this.rest = new RequestHandler(token)
   }

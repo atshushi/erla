@@ -15,6 +15,7 @@ export default class Socket extends EventEmitter {
   #interval = null
   #token
   #intents
+  #reconnect
 
   constructor (client) {
     super()
@@ -22,6 +23,7 @@ export default class Socket extends EventEmitter {
     this.#client = client
     this.#token = client.token
     this.#intents = client.intents
+    this.#reconnect = client.reconnect
   }
 
   connect () {
@@ -29,7 +31,7 @@ export default class Socket extends EventEmitter {
 
     this.#connection.on('open', () => this.#openConnection())
     this.#connection.on('message', payload => this.#handleMessage(payload))
-    this.#connection.on('close', () => this.#autoReconnect())
+    this.#connection.on('close', (code, reason) => this.#handleClose(code, reason))
     this.#connection.on('error', err => this.#handleError(err))
   }
 
@@ -41,6 +43,8 @@ export default class Socket extends EventEmitter {
   }
 
   #openConnection () {
+    this.#client.emit('connect')
+
     this.#connection.send(
       JSON.stringify({
         op: OPCODES.IDENTIFY,
@@ -70,7 +74,27 @@ export default class Socket extends EventEmitter {
     }
   }
 
+  #handleClose (code, reason) {
+    reason = reason.toString()
+
+    this.#client.emit('close', {
+      reason,
+      code
+    })
+
+    console.error(new Error(reason))
+
+    if (this.#reconnect) {
+      this.#autoReconnect()
+    } else {
+      this.disconnect()
+      process.exit()
+    }
+  }
+
   #autoReconnect () {
+    this.#client.emit('reconnect')
+
     this.#connection.terminate()
     clearInterval(this.#interval)
     this.#connection.removeAllListeners()
@@ -78,7 +102,8 @@ export default class Socket extends EventEmitter {
     this.connect()
   }
 
-  #handleError () {
+  #handleError (err) {
+    this.#client.emit('error', err)
     this.#connection.terminate()
   }
 
@@ -97,6 +122,11 @@ export default class Socket extends EventEmitter {
     switch (payload.t) {
       case 'READY':
         this.#client.user = new User(payload.d)
+
+        if (!payload.d.guilds.length) {
+          this.#client.emit('ready')
+          break
+        }
 
         for (const guild of payload.d.guilds) {
           this.#client.unavailableGuilds.add(guild.id, guild)
