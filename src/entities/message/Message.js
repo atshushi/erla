@@ -3,8 +3,8 @@ import Base from '../Base.js'
 import User from '../global/User.js'
 
 export default class Message extends Base {
-  constructor (d) {
-    super(d.id)
+  constructor (client, d) {
+    super(client, d.id)
 
     this.content = d.content
     this.channelId = d.channel_id

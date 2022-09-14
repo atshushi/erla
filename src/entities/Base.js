@@ -1,5 +1,6 @@
 export default class Base {
-  constructor (id) {
+  constructor (client, id) {
+    this.client = client
     this.id = id
   }
 

@@ -121,21 +121,22 @@ export default class Socket extends EventEmitter {
 
     switch (payload.t) {
       case 'READY':
-        this.#client.user = new User(payload.d)
+        this.#client.user = new User(this.#client, payload.d)
 
         if (!payload.d.guilds.length) {
           this.#client.emit('ready')
           break
         }
 
+        this.#client.emit('preReady')
+
         for (const guild of payload.d.guilds) {
           this.#client.unavailableGuilds.add(guild.id, guild)
         }
-
         break
 
       case 'MESSAGE_CREATE':
-        this.#client.emit('messageCreate', new Message(payload.d))
+        this.#client.emit('messageCreate', new Message(this.#client, payload.d))
         break
 
       case 'INTERACTION_CREATE':
@@ -143,7 +144,7 @@ export default class Socket extends EventEmitter {
         break
 
       case 'GUILD_CREATE': {
-        const guild = new Guild(payload.d)
+        const guild = new Guild(this.#client, payload.d)
 
         const removed = this.#client.unavailableGuilds.remove(guild.id)
         this.#client.guilds.add(guild.id, guild)
@@ -157,7 +158,7 @@ export default class Socket extends EventEmitter {
       }
 
       case 'GUILD_REMOVE': {
-        const guild = new Guild(payload.d)
+        const guild = new Guild(this.#client, payload.d)
 
         this.#client.guilds.remove(guild.id)
         this.#client.emit('guildRemove', guild)

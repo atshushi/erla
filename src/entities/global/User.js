@@ -3,8 +3,8 @@ import Base from '../Base.js'
 import PublicFlags from '../../util/PublicFlags.js'
 
 export default class User extends Base {
-  constructor (d) {
-    super(d.id)
+  constructor (client, d) {
+    super(client, d.id)
 
     this.username = d.username
     this.discrim = d.discriminator
