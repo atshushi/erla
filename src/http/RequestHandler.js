@@ -1,79 +1,56 @@
-import https from 'https'
+import { Client } from 'undici'
 
 import { IDENTIFICATION, VERSION, REPOSITORY } from '../util/Constants.js'
 
 export default class RequestHandler {
-  #url = `https://discord.com/api/v${VERSION}`
+  #url = 'https://discord.com:443'
+  #client
   #token
 
   constructor (token) {
+    this.#client = new Client(this.#url)
     this.#token = token
   }
 
-  request (path, method, body) {
-    return new Promise((resolve, reject) => {
-      const url = new URL(this.#url + path)
-
-      const req = https.request({
-        host: url.host,
-        path: url.pathname,
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bot ${this.#token.replace(/Bot\s?/, '')}`,
-          'User-Agent': `${IDENTIFICATION} (${REPOSITORY} ${VERSION})`
-        }
-      }, async message => {
-        message.on('error', reject)
-
-        const buffers = []
-
-        for await (const chunk of message) {
-          buffers.push(chunk)
-        }
-
-        const data = Buffer.concat(buffers).toString('utf-8')
-
-        if (data) {
-          resolve(JSON.parse(data))
-        } else {
-          resolve({
-            statusCode: message.statusCode,
-            message: message.statusMessage
-          })
-        }
-      })
-
-      if (body) {
-        const data = typeof body === 'string'
-          ? body
-          : JSON.stringify(body)
-
-        req.setHeader('Content-Length', data.length)
-        req.write(data)
+  async #request (path, method, data) {
+    const options = {
+      path: `/api/v${VERSION}${path}`,
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bot ${this.#token.replace(/Bot\s?/, '')}`,
+        'User-Agent': `${IDENTIFICATION} (${REPOSITORY} ${VERSION})`
       }
+    }
 
-      req.end()
-    })
+    if (data) {
+      options.body = typeof data === 'string'
+        ? data
+        : JSON.stringify(data)
+    }
+
+    const { body } = await this.#client.request(options)
+
+    return await body.json()
   }
 
   get (path) {
-    return this.request(path, 'GET')
+    return this.#request(path, 'GET')
   }
 
   post (path, body) {
-    return this.request(path, 'POST', body)
+    return this.#request(path, 'POST', body)
   }
 
   patch (path, body) {
-    return this.request(path, 'PATCH', body)
+    return this.#request(path, 'PATCH', body)
   }
 
   put (path, body) {
-    return this.request(path, 'PUT', body)
+    return this.#request(path, 'PUT', body)
   }
 
   delete (path, body) {
-    return this.request(path, 'DELETE', body)
+    return this.#request(path, 'DELETE', body)
   }
 }
