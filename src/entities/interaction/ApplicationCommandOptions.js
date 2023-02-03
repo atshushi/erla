@@ -1,7 +1,7 @@
 export default class ApplicationCommandOptions {
-  constructor (data) {
-    this.value = data.value
-    this.type = data.type
-    this.name = data.name
+  constructor (d) {
+    this.value = d.value
+    this.type = d.type
+    this.name = d.name
   }
 }

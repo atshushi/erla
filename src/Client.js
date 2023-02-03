@@ -41,13 +41,13 @@ export default class Client extends EventEmitter {
     return this.rest.post(
       Endpoints.CHANNEL_MESSAGES(channelId),
       options
-    ).then(d => new Message(this, d))
+    ).then(d => new Message(d))
   }
 
   fetchUser (userId) {
     return this.rest.get(
       Endpoints.USER(userId)
-    ).then(d => new User(this, d))
+    ).then(d => new User(d))
   }
 
   getGlobalCommands () {
