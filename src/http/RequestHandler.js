@@ -12,8 +12,9 @@ export default class RequestHandler {
     this.#token = token
   }
 
-  async #request (path, method, data) {
-    const options = {
+  async #request (path, method, body) {
+    const bufs = []
+    const opts = {
       path: `/api/v${VERSION}${path}`,
       method,
       headers: {
@@ -23,15 +24,21 @@ export default class RequestHandler {
       }
     }
 
-    if (data) {
-      options.body = typeof data === 'string'
-        ? data
-        : JSON.stringify(data)
+    if (body) {
+      opts.body = typeof body === 'string'
+        ? body
+        : JSON.stringify(body)
     }
 
-    const { body } = await this.#client.request(options)
-
-    return await body.json()
+    return new Promise((resolve, reject) => {
+      return this.#client.dispatch(opts, {
+        onConnect: () => null,
+        onData: chunk => bufs.push(chunk),
+        onHeaders: () => null,
+        onComplete: () => resolve(JSON.parse(Buffer.concat(bufs).toString('utf8'))),
+        onError: reject
+      })
+    })
   }
 
   get (path) {
