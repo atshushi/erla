@@ -1,37 +1,43 @@
-import { Client } from 'undici'
-
-import { IDENTIFICATION, VERSION, REPOSITORY } from '../util/Constants.js'
+import { Client, FormData } from 'undici'
 
 export default class RequestHandler {
-  #url = 'https://discord.com:443'
-  #client
-  #token
-
   constructor (token) {
-    this.#client = new Client(this.#url)
-    this.#token = token
+    this._client = new Client('https://discord.com:443')
+    this._token = token
   }
 
-  async #request (path, method, body) {
-    const bufs = []
-    const opts = {
-      path: `/api/v${VERSION}${path}`,
+  async _request (path, method, options) {
+    const requestOptions = {
+      path: '/api/v10' + path,
       method,
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bot ${this.#token.replace(/Bot\s?/, '')}`,
-        'User-Agent': `${IDENTIFICATION} (${REPOSITORY} ${VERSION})`
+        Authorization: 'Bot ' + this._token.replace(/Bot\s?/, ''),
+        'User-Agent': 'coai (https://github.com/4rth8/coai 0.0.1)'
       }
     }
 
-    if (body) {
-      opts.body = typeof body === 'string'
-        ? body
-        : JSON.stringify(body)
+    if (options.files) {
+      const data = new FormData()
+
+      for (const file of options.files) {
+        data.append(file.name, file.data, file.name)
+      }
+
+      if (options.body) {
+        data.append('payload_json', JSON.stringify(options.body))
+      }
+
+      requestOptions.body = data
+    } else if (options.body) {
+      requestOptions.headers['Content-Type'] = 'application/json'
+
+      requestOptions.body = JSON.stringify(options.body)
     }
 
     return new Promise((resolve, reject) => {
-      return this.#client.dispatch(opts, {
+      const bufs = []
+
+      return this._client.dispatch(requestOptions, {
         onConnect: () => null,
         onData: chunk => bufs.push(chunk),
         onHeaders: () => null,
@@ -42,22 +48,22 @@ export default class RequestHandler {
   }
 
   get (path) {
-    return this.#request(path, 'GET')
+    return this._request(path, 'GET')
   }
 
-  post (path, body) {
-    return this.#request(path, 'POST', body)
+  post (path, options) {
+    return this._request(path, 'POST', options)
   }
 
-  patch (path, body) {
-    return this.#request(path, 'PATCH', body)
+  patch (path, options) {
+    return this._request(path, 'PATCH', options)
   }
 
-  put (path, body) {
-    return this.#request(path, 'PUT', body)
+  put (path, options) {
+    return this._request(path, 'PUT', options)
   }
 
-  delete (path, body) {
-    return this.#request(path, 'DELETE', body)
+  delete (path, options) {
+    return this._request(path, 'DELETE', options)
   }
 }

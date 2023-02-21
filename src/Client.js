@@ -32,8 +32,8 @@ export default class Client extends EventEmitter {
   }
 
   createMessage (channelId, options) {
-    if (typeof options === 'string') {
-      options = {
+    if (typeof options.body === 'string') {
+      options.body = {
         content: options
       }
     }
@@ -61,7 +61,9 @@ export default class Client extends EventEmitter {
     return this.rest.post(
       Endpoints.GLOBAL_APPLICATION_COMMAND_REGISTER(
         this.user.id
-      ), command)
+      ), {
+        body: command
+      })
   }
 
   getGlobalCommand (commandId) {
@@ -77,7 +79,9 @@ export default class Client extends EventEmitter {
       Endpoints.GLOBAL_APPLICATION_COMMAND_EDITOR(
         this.user.id,
         commandId
-      ), newCommand)
+      ), {
+        body: newCommand
+      })
   }
 
   deleteGlobalCommand (commandId) {
@@ -92,7 +96,9 @@ export default class Client extends EventEmitter {
     return this.rest.put(
       Endpoints.GLOBAL_APPLICATION_COMMAND_REGISTER(
         this.user.id
-      ), commands)
+      ), {
+        body: commands
+      })
   }
 
   getGuildCommands (guildId) {
@@ -108,7 +114,9 @@ export default class Client extends EventEmitter {
       Endpoints.GUILD_APPLICATION_COMMAND_REGISTER(
         this.user.id,
         guildId
-      ), command)
+      ), {
+        body: command
+      })
   }
 
   getGuildCommand (guildId, commandId) {
@@ -126,7 +134,9 @@ export default class Client extends EventEmitter {
         this.user.id,
         guildId,
         commandId
-      ), newCommand)
+      ), {
+        body: newCommand
+      })
   }
 
   deleteGuildCommand (guildId, commandId) {
@@ -143,6 +153,8 @@ export default class Client extends EventEmitter {
       Endpoints.GUILD_APPLICATION_COMMAND_REGISTER(
         this.user.id,
         guildId
-      ), commands)
+      ), {
+        body: commands
+      })
   }
 }
