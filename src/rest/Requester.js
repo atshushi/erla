@@ -1,23 +1,23 @@
-import { Client, FormData } from 'undici'
+import undici from 'undici'
 
-export default class RequestHandler {
+export default class Requester {
   constructor (token) {
-    this._client = new Client('https://discord.com:443')
+    this._client = new undici.Client('https://discord.com:443')
     this._token = token
   }
 
-  async _request (path, method, options) {
+  async request (method, path, options) {
     const requestOptions = {
       path: '/api/v10' + path,
       method,
       headers: {
         Authorization: 'Bot ' + this._token.replace(/Bot\s?/, ''),
-        'User-Agent': 'coai (https://github.com/4rth8/coai 0.0.1)'
+        'User-Agent': 'erla (https://github.com/erlajs/erla 1.0.0)'
       }
     }
 
     if (options.files) {
-      const data = new FormData()
+      const data = new undici.FormData()
 
       for (const file of options.files) {
         data.append(file.name, file.data, file.name)
@@ -45,25 +45,5 @@ export default class RequestHandler {
         onError: reject
       })
     })
-  }
-
-  get (path) {
-    return this._request(path, 'GET')
-  }
-
-  post (path, options) {
-    return this._request(path, 'POST', options)
-  }
-
-  patch (path, options) {
-    return this._request(path, 'PATCH', options)
-  }
-
-  put (path, options) {
-    return this._request(path, 'PUT', options)
-  }
-
-  delete (path, options) {
-    return this._request(path, 'DELETE', options)
   }
 }

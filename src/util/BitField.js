@@ -1,15 +1,12 @@
 export default class BitField {
-  #bitfield
-
-  constructor (bitfield, flags) {
-    this.#bitfield = bitfield
-    this.value = flags
+  constructor (bitfield) {
+    this.bitfield = bitfield
   }
 
-  parse () {
-    return Object.entries(this.#bitfield)
+  parse (flags) {
+    return Object.entries(this.bitfield)
       .reduce((entries, [field, bit]) => {
-        if ((this.value & bit) === bit) {
+        if ((flags & bit) === bit) {
           entries.push(field)
         }
 

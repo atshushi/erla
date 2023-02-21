@@ -10,5 +10,6 @@ export default class Message extends Base {
     this.channelId = d.channel_id
     this.author = new User(d.author)
     this.timestamp = new Date(d.timestamp)
+    this.attachments = d.attachments
   }
 }
