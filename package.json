@@ -1,16 +1,20 @@
 {
   "name": "erla",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "JavaScript abstractions for Discord API",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "type": "module",
   "repository": "https://github.com/erlajs/erla",
-  "author": "akaeleven1 <81419484+arthureleven@users.noreply.github.com>",
-  "license": "MIT",
+  "author": "4rth8 <122944216+4rth8@users.noreply.github.com>",
+  "license": "GPL-3.0",
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prepare": "husky install"
+  },
+  "dependencies": {
+    "undici": "^5.16.0",
+    "ws": "^8.12.0"
   },
   "devDependencies": {
     "eslint": "^8.33.0",
@@ -19,9 +23,5 @@
     "eslint-plugin-n": "^15.6.1",
     "eslint-plugin-promise": "^6.1.1",
     "husky": "^8.0.3"
-  },
-  "dependencies": {
-    "undici": "^5.16.0",
-    "ws": "^8.12.0"
   }
 }
